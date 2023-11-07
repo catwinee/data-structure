@@ -3,7 +3,7 @@
 #include <iomanip>
 using namespace std;
 ofstream outputFile;
-int f(int x)
+int f(int x) //递归没什么好说的
 {
     if (!x)
         return 0;
@@ -20,7 +20,7 @@ int main()
     for (int i = 0; i <= 39; ++i)
     {
         outputFile << setw(6) << f(i);
-        if (i % 8 == 7)
+        if (i % 5 == 4)
             outputFile << '\n';
     }
     outputFile.close();

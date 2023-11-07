@@ -1,0 +1,1 @@
+{"name":"Local: kmp","url":"c:\\Users\\84519\\Desktop\\Computer Science\\Datastructure\\tasks\\report4\\kmp.cpp","tests":[{"id":1697895698388,"input":"abcd\nabc\nz","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\Users\\84519\\Desktop\\Computer Science\\Datastructure\\tasks\\report4\\kmp.cpp","group":"local","local":true}

@@ -1,90 +1,131 @@
+#ifndef _SEQSTACK_H_
+#define _SEQSTACK_H_
+#include "stack.h"
 #include <iostream>
+#include <iomanip>
 using namespace std;
 
-#define OK 1
-#define ERROR 0
-#define TRUE 1
-#define FALSE 0
-#define INFEASIBLE -1
-#define OVERFLOW -2
-#define DOWNFLOW -3
-typedef int Status;
-
-#define STACK_INIT_SIZE 100
-#define INCREMENT 10
-typedef int elemtype;
-typedef struct 
+template <class elemT>
+class seqStack : public Stack<elemT>
 {
-    elemtype *elem;
-    int size, top;
-}seqStack;
-
-seqStack initStack(seqStack &s)
-{
-    s.elem = new elemtype[STACK_INIT_SIZE];
-    if (!s.elem)
+private:
+    elemT *elem;
+    int top;
+    int size;
+    void downflow() const
     {
-        cerr << "内存分配失败!\n";
-        exit(DOWNFLOW);
+        printf("ERROR: Downflow!\n");
+        printf("Details: size=%d", top);
+        exit(-1);
     }
-    s.size = STACK_INIT_SIZE;
-    s.top = -1;
-    return s;
-}
-Status destroyStack(seqStack &s)
-{
-    delete s.elem;
-    s.top = -1;
-    s.size = 0;
-    return OK;
-}
-
-bool isFull(seqStack &s)
-{
-    return s.top == s.size - 1;
-}
-bool isEmpty(seqStack &s)
-{
-    return s.top == -1;
-}
-int lenStack(seqStack &s)
-{
-    return s.top + 1;
-}
-
-Status Push(seqStack &s, elemtype e)
-{
-    if (isFull(s)) // 栈满
+    void badalloc() const
     {
-        elemtype *tmp = new elemtype[s.size + INCREMENT];
-        if (!tmp)
+        printf("ERROR: Bad alloc!\n");
+        exit(-1);
+    }
+    void expand(int increment = 10)
+    {
+        elemT *tmp = elem;
+        elem = new (nothrow) elemT[size + increment];
+        if (!elem)
+            badalloc();
+        for (int i = 0; i <= top; ++i)
+            elem[i] = tmp[i];
+        delete[] tmp;
+        tmp = nullptr;
+    }
+public:
+    seqStack(int initSize = 100);
+    seqStack(const seqStack &s);
+    ~seqStack();
+    void Push(const elemT &e);
+    elemT Pop();
+    void Clear()
+    {
+        top = -1;
+    }
+    int Len() const
+    {
+        return top + 1;
+    }
+    int Size() const
+    {
+        return size;
+    }
+    bool isEmpty() const
+    {
+        return top == -1;
+    }
+    bool isFull() const
+    {
+        return top == size - 1;
+    }
+    elemT Top() const;
+    void Traverse() const
+    {
+        printf("Traverse:\n");
+        if (isEmpty())
+            return (void)printf("Empty!\n");
+        for (int i = 0; i <= top; ++i)
         {
-            cerr << "内存分配失败!\n";
-            exit(DOWNFLOW);
+            cout << setw(5) << elem[i];
+            if (i % 5 == 4)
+                cout << '\n';
         }
-        copy(s.elem, s.elem + (elemtype)s.size, tmp);
-        delete[] s.elem;
-        s.elem = tmp;
-        s.size += INCREMENT;
     }
-    s.elem[++s.top] = e;
-    return OK;
-}
-elemtype Pop(seqStack &s)
+};
+
+template <class elemT>
+seqStack<elemT>::seqStack(int initSize)
 {
-    if ((isEmpty(s)))
-    {
-        cerr << "栈发生下溢!\n";
-        exit(DOWNFLOW);
-    }
-    return s.elem[s.top--];
+    elem = new (nothrow) elemT[initSize];
+    if (!elem)
+        badalloc();
+    top = -1;
+    size = initSize;
 }
-elemtype getTop(seqStack &s)
+template <class elemT>
+seqStack<elemT>::seqStack(const seqStack &s)
 {
-    if ((isEmpty(s)))
-    {
-        cerr << "栈发生下溢!\n";
-        exit(DOWNFLOW);
-    }
-    return s.elem[s.top];
+    elem = new (nothrow) elemT[s.size];
+    if (!elem)
+        badalloc();
+    for (int i = 0; i <= s.top; ++i)
+        elem[i] = s.elem[i];
+    size = s.size;
+    top = s.top;
 }
+template <class elemT>
+seqStack<elemT>::~seqStack()
+{
+    delete[] elem;
+    elem = nullptr;
+    size = -1;
+    top = -2;
+}
+
+template <class elemT>
+void seqStack<elemT>::Push(const elemT &e)
+{
+    if (isFull())
+        expand();
+    elem[++top] = e;
+}
+
+template <class elemT>
+elemT seqStack<elemT>::Pop()
+{
+    if (isEmpty())
+        downflow();
+    return elem[top--];
+}
+
+template <class elemT>
+elemT seqStack<elemT>::Top() const
+{
+    if (isEmpty())
+        downflow();
+    return elem[top];
+}
+
+#endif
